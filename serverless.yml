@@ -1,64 +1,71 @@
-# import type { AWS } from "@serverless/typescript";
-
-# import hello from "@functions/hello";
-
-# const serverlessConfiguration: AWS = {
-#   service: "invoice-creator",
-#   frameworkVersion: "3",
-#   plugins: ["serverless-esbuild"],
-#   provider: {
-#     name: "aws",
-#     runtime: "nodejs14.x",
-#     apiGateway: {
-#       minimumCompressionSize: 1024,
-#       shouldStartNameWithService: true,
-#     },
-#     environment: {
-#       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
-#       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
-#     },
-#   },
-#   // import the function via paths
-#   functions: { hello },
-#   package: { individually: true },
-#   custom: {
-#     esbuild: {
-#       bundle: true,
-#       minify: false,
-#       sourcemap: true,
-#       exclude: ["aws-sdk"],
-#       target: "node14",
-#       define: { "require.resolve": undefined },
-#       platform: "node",
-#       concurrency: 10,
-#     },
-#   },
-# };
-
-# module.exports = serverlessConfiguration;
-
 service: "invoice-creator"
 # frameworkVersion: 3
 plugins:
   - serverless-esbuild
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
 
 provider:
   name: aws
   runtime: nodejs14.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-west-1'}
+
   environment:
+    USERS_TABLE: USERS-${self:provider.stage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
 
 functions:
-  hello:
+  Hello:
     handler: src/lambda/hello/hello.handler
     events:
       - http:
           method: post
           path: hello
 
+  Login:
+    handler: src/lambda/http/login.handler
+    events:
+      - http:
+          method: post
+          path: login
+
+  Register:
+    handler: src/lambda/http/register.handler
+    events:
+      - http:
+          method: post
+          path: signup
+          reqValidatorName: RequestBodyValidador
+          documentation:
+            summary: create a new user
+            description: create a new user
+            requestModels:
+              "application/json": RegisterUserRequest
+
 package:
   individually: true
 
 custom:
+  documentation:
+    api:
+      info:
+        version: "1.0.0"
+        title: Invoice-creator
+        description: serverless application to create and manage invoice
+
+    models:
+      - name: RegisterUserRequest
+        contentType: application/json
+        schema: ${file(src/models/register-user-request.json)}
+
   esbuild:
   bundle: true
   minify: false
@@ -70,3 +77,31 @@ custom:
   require.resolve: undefined
   platform: node
   concurrency: 10
+
+resources:
+  Resources:
+    RequestBodyValidador:
+      Type: "AWS::ApiGateway::RequestValidator"
+      Properties:
+        Name: "req-body-validator"
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+
+    UsersDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: email
+            KeyType: RANGE

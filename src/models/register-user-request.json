@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft-04/schema#",
+  "title": "users",
+  "description": "a user",
+  "type": "object",
+  "properties": {
+    "firstName": {
+      "description": "first name of the user",
+      "type": "string"
+    },
+
+    "lastName": {
+      "description": "last name of the user",
+      "type": "string"
+    },
+
+    "email": {
+      "description": "the email of the user",
+      "type": "string"
+    },
+
+    "password": {
+      "description": "the password for the email",
+      "type": "string"
+    }
+  },
+  "required": ["firstName", "lastName", "email", "password"],
+  "additionalProperties": false
+}
