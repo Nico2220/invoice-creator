@@ -9,7 +9,6 @@ const usersTbale = process.env.USERS_TABLE;
 export const handler: APIGatewayProxyHandlerV2 = async (
   event: APIGatewayProxyEventV2
 ) => {
-  console.log("event:", event);
   const body = JSON.parse(event.body);
 
   const id = uuid.v4();
