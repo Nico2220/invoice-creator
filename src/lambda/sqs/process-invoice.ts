@@ -4,8 +4,8 @@ import puppeteer from "puppeteer-core";
 import chromium from "chrome-aws-lambda";
 
 const sqsClient = new AWS.SQS();
-const queueUrl =
-  "https://sqs.eu-west-1.amazonaws.com/306486807413/invoice_queue";
+const queueUrl = "";
+
 export const handler: SQSHandler = async (event: SQSEvent) => {
   console.log("Processing  SQS Event...", JSON.stringify(event));
 
