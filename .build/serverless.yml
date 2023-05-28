@@ -4,10 +4,11 @@ plugins:
   - serverless-esbuild
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
+  - serverless-plugin-chrome
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-west-1'}
 
@@ -81,10 +82,12 @@ functions:
             Fn::GetAtt:
               - InvoiceSQS
               - Arn
-    timeout: 10
+    runtime: nodejs8.10
 
 package:
   individually: true
+  exclude:
+    - node_modules/puppeteer/.local-chromium/**
 
 custom:
   documentation:
@@ -100,10 +103,6 @@ custom:
         schema: ${file(src/models/register-user-request.json)}
 
   esbuild:
-    external:
-      - chrome-aws-lambda
-    packager: yarn
-    packagePath: "./package.json"
   bundle: true
   minify: false
   sourcemap: true
@@ -114,6 +113,15 @@ custom:
   require.resolve: undefined
   platform: node
   concurrency: 10
+
+  chrome:
+    flags:
+      - --window-size=1280,1696 # Letter size
+      - --hide-scrollbars
+      - --ignore-certificate-errors
+    # functions:
+    #   - enableChromeOnThisFunctionName
+    #   - mySuperChromeFunction
 
 resources:
   Resources:

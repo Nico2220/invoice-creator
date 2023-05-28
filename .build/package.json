@@ -14,7 +14,6 @@
     "@middy/core": "^3.4.0",
     "@middy/http-json-body-parser": "^3.4.0",
     "@serverless-chrome/lambda": "^1.0.0-57.2",
-    "@sparticuz/chromium": "106",
     "@types/bcryptjs": "^2.4.2",
     "@types/jsonwebtoken": "^9.0.2",
     "aws-sdk": "^2.1381.0",
@@ -22,10 +21,11 @@
     "chrome-aws-lambda": "^10.1.0",
     "jsonwebtoken": "^9.0.0",
     "puppeteer": "^20.4.0",
-    "puppeteer-core": "10.0.0",
+    "puppeteer-core": "^20.4.0",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-plugin-chrome": "^1.0.0-55.3",
     "serverless-reqvalidator-plugin": "^3.0.0",
+    "superagent": "^8.0.9",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
