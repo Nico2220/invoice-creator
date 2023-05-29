@@ -15,6 +15,7 @@ provider:
     USERS_TABLE: USERS-${self:provider.stage}
     USERS_EMAIL_INDEX: usersEmailIndex
     SECRET_AUTH: secretauth-${self:provider.stage}
+    INVOICES_S3_BUCKET: invoice-s3-bucket-${self:provider.stage}
 
   iamRoleStatements:
     - Effect: Allow
@@ -33,6 +34,12 @@ provider:
       Action:
         - sqs:SendMessage
       Resource: arn:aws:sqs:eu-west-1:306486807413:invoice_queue
+
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: arn:aws:s3:::${self:provider.environment.INVOICES_S3_BUCKET}/*
 
 functions:
   Hello:
@@ -82,6 +89,7 @@ functions:
               - InvoiceSQS
               - Arn
     timeout: 10
+    # memorySize: 1024
 
 package:
   individually: true
@@ -162,3 +170,37 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: "invoice-dlq"
+
+    InvoicesPdf:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.INVOICES_S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    # BucketPolicy:
+    #   Type: AWS::S3::BucketPolicy
+    #   Properties:
+    #     PolicyDocument:
+    #       Id: Policy1680676867147
+    #       Version: "2012-10-17"
+    #       Statement:
+    #         - Sid: Stmt1680676858392
+    #           Action:
+    #             - s3:GetObject
+    #           Effect: Allow
+    #           Resource: "arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*"
+    #           Principal: "*"
+    #     Bucket:
+    #       Ref: AttachmentsBucket
