@@ -1,6 +1,6 @@
 import { SQSEvent, SQSHandler } from "aws-lambda";
 import * as AWS from "aws-sdk";
-import puppeteer, { Page } from "puppeteer-core";
+import puppeteer from "puppeteer-core";
 import chromium from "chrome-aws-lambda";
 import * as uuid from "uuid";
 import { resolve } from "path";

@@ -1,8 +1,8 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from "aws-lambda";
 import * as AWS from "aws-sdk";
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
-const sqsClient = new SQSClient({ region: "eu-west-1" });
+// const sqsClient = new SQSClient({ region: "eu-west-1" });
+const sqsClient = new AWS.SQS({ region: "eu-west-1" });
 const queueUrl = "";
 export const handler: APIGatewayProxyHandlerV2 = async (
   event: APIGatewayProxyEventV2
@@ -14,20 +14,22 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   };
 
   try {
-    const data = await sqsClient.send(new SendMessageCommand(params));
-    if (data) {
-      console.log("Success, message sent. MessageID:", data.MessageId);
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data }),
-      };
-    } else {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ Error: "Bad request" }),
-      };
-    }
+    // const data = await sqsClient.send(new SendMessageCommand(params));
+    console.log("trying to send message");
+    const data = (await sqsClient
+      .sendMessage(params)
+      .promise()) as AWS.SQS.SendMessageResult;
+    console.log("result delete message", data);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ result: data.MessageId }),
+    };
   } catch (err) {
     console.log("Error:", JSON.stringify(err));
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ Error: err }),
+    };
   }
 };
