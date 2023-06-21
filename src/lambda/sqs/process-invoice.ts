@@ -3,12 +3,10 @@ import * as AWS from "aws-sdk";
 import puppeteer from "puppeteer-core";
 import chromium from "chrome-aws-lambda";
 import * as uuid from "uuid";
-import { resolve } from "path";
+import fs from "fs";
 
 const sqsClient = new AWS.SQS();
-const s3 = new AWS.S3({
-  signatureVersion: "4",
-});
+const s3 = new AWS.S3({});
 const queueUrl = "";
 
 const bucketName = process.env.INVOICES_S3_BUCKET;
@@ -19,11 +17,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
   for (const sqsRecord of event.Records) {
     console.log("sqsRecord: ", sqsRecord);
 
-    const url = await createAndUploadPdfONS3();
-
-    console.log("PDF URL", url);
-
-    console.log("Record has been processed", sqsRecord.body);
+    await createAndUploadPdfONS3();
 
     sqsClient.deleteMessage({
       QueueUrl: queueUrl,
@@ -35,7 +29,6 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
 };
 
 export async function createAndUploadPdfONS3() {
-  console.log("from Screenshot....");
   const path = await chromium.executablePath;
   console.log("path=", path);
   let screenshot;
@@ -50,27 +43,24 @@ export async function createAndUploadPdfONS3() {
 
     console.log("Pupetter has benn lauch....");
 
-    const page = await browser.newPage();
-    await page.goto("https://www.google.com/");
-
-    const url = await page.$eval("title", (el) => el.textContent);
-    console.log("title", url);
-
-    screenshot = await page.screenshot({ path: "/tmp/screenshot.png" });
     const invoiceId = uuid.v4();
-    // const uploadUrl = s3.upload(
-    //   {
-    //     Bucket: bucketName,
-    //     Key: invoiceId,
-    //     Body: screenshot,
-    //   },
-    //   (err, data) => {
-    //     if (err) console.log("Error uploading File:", JSON.stringify(err));
-    //     resolve(data.Key);
-    //   }
-    // );
+    const page = await browser.newPage();
+    await page.setContent(`<div>Hello from pdf</div>`);
+    await page.emulateMediaType("print");
 
-    console.log("screenshot", screenshot);
+    const pdfpath = `/tmp/${invoiceId}.pdf`;
+
+    const pdfBuffer = await page.pdf({ format: "a4", path: pdfpath });
+
+    const params = {
+      Bucket: bucketName,
+      Key: `${invoiceId}.pdf`,
+      Body: pdfBuffer,
+    };
+
+    const s3Result = await s3.upload(params).promise();
+
+    console.log("s3Result", s3Result);
 
     await browser.close();
     return screenshot;

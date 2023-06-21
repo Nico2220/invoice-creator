@@ -189,18 +189,17 @@ resources:
                 - HEAD
               MaxAge: 3000
 
-    # BucketPolicy:
-    #   Type: AWS::S3::BucketPolicy
-    #   Properties:
-    #     PolicyDocument:
-    #       Id: Policy1680676867147
-    #       Version: "2012-10-17"
-    #       Statement:
-    #         - Sid: Stmt1680676858392
-    #           Action:
-    #             - s3:GetObject
-    #           Effect: Allow
-    #           Resource: "arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*"
-    #           Principal: "*"
-    #     Bucket:
-    #       Ref: AttachmentsBucket
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: Policy1680676867147
+          Version: "2012-10-17"
+          Statement:
+            - Sid: Stmt1680676858394
+              Action: "*"
+              Effect: Allow
+              Resource: "arn:aws:s3:::${self:provider.environment.INVOICES_S3_BUCKET}/*"
+              Principal: "*"
+        Bucket:
+          Ref: InvoicesPdf

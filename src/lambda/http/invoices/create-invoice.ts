@@ -14,16 +14,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   };
 
   try {
-    // const data = await sqsClient.send(new SendMessageCommand(params));
-    console.log("trying to send message");
     const data = (await sqsClient
       .sendMessage(params)
       .promise()) as AWS.SQS.SendMessageResult;
-    console.log("result delete message", data);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ result: data.MessageId }),
+      body: JSON.stringify({ messageId: data.MessageId }),
     };
   } catch (err) {
     console.log("Error:", JSON.stringify(err));

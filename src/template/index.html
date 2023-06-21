@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style type="text/css">
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px;
+      }
+
+      .companies {
+        display: flex;
+        margin: 20px;
+      }
+
+      .from_container {
+        flex: 1;
+      }
+      .to_container {
+        flex: 1;
+      }
+
+      .from {
+        display: flex;
+        flex: 1;
+      }
+
+      .to {
+        display: flex;
+        flex: 1;
+      }
+
+      .fields {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .fields_value {
+        display: flex;
+        flex-direction: column;
+        margin-left: 20px;
+      }
+
+      table {
+        width: 100%;
+        /* border: 1px solid #fff; */
+      }
+
+      th {
+        border-right: 0.1px solid #000;
+        background-color: aliceblue;
+      }
+      td {
+      }
+
+      .sum {
+        text-align: right;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <div>
+        <h1>Facture F2300004</h1>
+        <p>31 mars 2023</p>
+      </div>
+
+      <h1>Logo</h1>
+    </div>
+
+    <div class="companies">
+      <div class="from_container">
+        <h1>Emmeteur</h1>
+        <div class="from">
+          <div class="fields">
+            <p>Society :</p>
+            <p>Contact:</p>
+            <p>Adress :</p>
+            <p>Contry :</p>
+            <p>Society number :</p>
+            <p>Code :</p>
+            <p>Vat number :</p>
+            <p>Phone number :</p>
+            <p>email :</p>
+          </div>
+
+          <div class="fields_value">
+            <p>Philibert Tech Ou</p>
+            <p>Nicolas Philibert</p>
+            <p>Harju talimn</p>
+            <p>Estonie</p>
+            <p>123445566</p>
+            <p>SARL</p>
+            <p>EE102413443</p>
+            <p>+7 9772820353</p>
+            <p>nphilibert17@gmail.com</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="to_container">
+        <h1>Destinataire</h1>
+        <div class="to">
+          <div class="fields">
+            <p>Society :</p>
+            <p>Contact:</p>
+            <p>Adress :</p>
+            <p>Contry :</p>
+            <p>Society number :</p>
+            <p>Code :</p>
+          </div>
+
+          <div class="fields_value">
+            <p>Philibert Tech Ou</p>
+            <p>Nicolas Philibert</p>
+            <p>Harju talimn</p>
+            <p>Estonie</p>
+            <p>123445566</p>
+            <p>SARL</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="Details">
+      <table>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Prix Unitaire HT</th>
+          <th>Quantite</th>
+          <th>Total</th>
+        </tr>
+        <tr>
+          <td>Service</td>
+          <td>Developpement et itegration D'API</td>
+          <td>2500 $</td>
+          <td>1</td>
+          <td>2500 $</td>
+        </tr>
+
+        <tr>
+          <td>Service</td>
+          <td>Developpement et itegration D'API</td>
+          <td>2500 $</td>
+          <td>1</td>
+          <td>2500 $</td>
+        </tr>
+      </table>
+    </div>
+
+    <p>TVA non applicable, art 293 B du CGI</p>
+
+    <p class="sum">Total : 2500 $</p>
+
+    <div class="condition">
+      <p>Conditions de regelement : a reception</p>
+      <p>Mode de payment : Virement bancaire</p>
+      <p>Notes:</p>
+      <p>Mentions Legales:</p>
+      <p>
+        Prestations soumises au mécanisme d’autoliquidation-Conformément à
+        l’article 196 de la directive du conseil 2006/112/EC du conseil
+      </p>
+    </div>
+  </body>
+</html>
