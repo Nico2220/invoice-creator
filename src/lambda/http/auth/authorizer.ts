@@ -17,8 +17,6 @@ export const handler = async (
       exp: number;
     };
 
-    console.log("decodedToken=", decodedToken);
-
     return {
       principalId: JSON.stringify(decodedToken.user),
       policyDocument: {

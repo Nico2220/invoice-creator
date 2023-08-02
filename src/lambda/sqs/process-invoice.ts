@@ -10,12 +10,16 @@ const s3 = new AWS.S3({});
 const queueUrl = "";
 
 const bucketName = process.env.INVOICES_S3_BUCKET;
+const invoiceTables = process.env.INVOICES_TABLE;
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   console.log("Processing  SQS Event...", JSON.stringify(event));
 
   for (const sqsRecord of event.Records) {
     console.log("sqsRecord: ", sqsRecord);
+
+    await await saveInvoice({});
 
     await createAndUploadPdfONS3();
 
@@ -60,6 +64,8 @@ export async function createAndUploadPdfONS3() {
 
     const s3Result = await s3.upload(params).promise();
 
+    //register invoice in bd
+
     console.log("s3Result", s3Result);
 
     await browser.close();
@@ -75,4 +81,19 @@ async function getUploadUrl(invoiceId: string) {
     Key: invoiceId,
     Expires: 300,
   });
+}
+
+async function saveInvoice(invoiceData) {
+  const item = {
+    invoiceData,
+    invoiceUrl: "",
+  };
+  await docClient
+    .put({
+      TableName: "",
+      Item: item,
+    })
+    .promise();
+
+  return item;
 }

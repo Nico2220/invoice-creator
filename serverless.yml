@@ -14,8 +14,10 @@ provider:
   environment:
     USERS_TABLE: USERS-${self:provider.stage}
     USERS_EMAIL_INDEX: usersEmailIndex
+    INVOICES_TABLE: invoice-${self:provider.stage}
     SECRET_AUTH: secretauth-${self:provider.stage}
     INVOICES_S3_BUCKET: invoice-s3-bucket-${self:provider.stage}
+    COMPANIES_TABLE: companies-${self:provider.stage}
 
   iamRoleStatements:
     - Effect: Allow
@@ -24,6 +26,13 @@ provider:
         - dynamodb:PutItem
         - dynamodb:GetItem
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
+
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
 
     - Effect: Allow
       Action:
@@ -72,6 +81,13 @@ functions:
 
   Auth:
     handler: src/lambda/http/auth/authorizer.handler
+
+  CreateCompanies:
+    handler: src/lambda/http/companies/addCompanies.handler
+    events:
+      - http:
+          method: post
+          path: companies
 
   CreateInvoiceStep1:
     handler: src/lambda/http/invoices/create-invoice.handler
@@ -154,6 +170,39 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
+
+    CompaniesDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.COMPANIES_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        # GlobalSecondaryIndexes:
+        #   - IndexName: ${self:provider.environment.USERS_EMAIL_INDEX}
+        #     KeySchema:
+        #       - AttributeName: email
+        #         KeyType: HASH
+        #     Projection:
+        #       ProjectionType: ALL
+
+    InvoicesDynamodbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.INVOICES_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          # - AttributeName: email
+          #   AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
 
     InvoiceSQS:
       Type: AWS::SQS::Queue
