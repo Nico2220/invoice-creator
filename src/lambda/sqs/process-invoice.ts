@@ -10,7 +10,7 @@ const s3 = new AWS.S3({});
 const queueUrl = "";
 
 const bucketName = process.env.INVOICES_S3_BUCKET;
-const invoiceTables = process.env.INVOICES_TABLE;
+const invoiceTable = process.env.INVOICES_TABLE;
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
@@ -19,6 +19,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
   for (const sqsRecord of event.Records) {
     console.log("sqsRecord: ", sqsRecord);
 
+    // I added a invoice db in serverless file and save invoicedata into db
     await await saveInvoice({});
 
     await createAndUploadPdfONS3();
@@ -90,7 +91,7 @@ async function saveInvoice(invoiceData) {
   };
   await docClient
     .put({
-      TableName: "",
+      TableName: invoiceTable,
       Item: item,
     })
     .promise();
