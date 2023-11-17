@@ -9,7 +9,7 @@ jspm_packages
 .esbuild
 
 # build directories
-/.build
+.build
 
 # OS
 .DS_Store
