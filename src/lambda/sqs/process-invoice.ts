@@ -14,6 +14,7 @@ const queueUrl = process.env.INVOICE_QUEUE_URL;
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 interface InvoiceData {
+  id?: string;
   from: string;
   to: string;
   invoiceUrl?: string;
@@ -28,6 +29,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     try {
       const parsedBody = JSON.parse(sqsRecord.body) as InvoiceData;
       await saveInvoice(parsedBody);
+      console.log("invoice saved");
 
       await createAndUploadPdfONS3();
 
@@ -37,7 +39,9 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       });
 
       console.log("Record has been deleted", sqsRecord.receiptHandle);
-    } catch (err) {}
+    } catch (err) {
+      console.log("Error:", JSON.stringify(err));
+    }
   }
 };
 
@@ -93,10 +97,14 @@ async function getUploadUrl(invoiceId: string) {
 }
 
 async function saveInvoice(invoiceData: InvoiceData) {
+  const id = uuid.v4();
   const item = {
-    invoiceData,
+    id,
+    from: invoiceData.from,
+    to: invoiceData.to,
     invoiceUrl: "",
   };
+
   await docClient
     .put({
       TableName: invoiceTable,
