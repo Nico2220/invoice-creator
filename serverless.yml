@@ -18,6 +18,7 @@ provider:
     SECRET_AUTH: secretauth-${self:provider.stage}
     INVOICES_S3_BUCKET: invoice-s3-bucket-${self:provider.stage}
     COMPANIES_TABLE: companies-${self:provider.stage}
+    INVOICE_QUEUE_URL: { Ref: InvoiceSQS }
 
   iamRoleStatements:
     - Effect: Allow
@@ -57,7 +58,7 @@ functions:
       - http:
           method: post
           path: hello
-          authorizer: Auth
+          # authorizer: Auth
 
   Login:
     handler: src/lambda/http/login.handler

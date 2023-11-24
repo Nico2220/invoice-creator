@@ -3,7 +3,7 @@ import * as AWS from "aws-sdk";
 
 // const sqsClient = new SQSClient({ region: "eu-west-1" });
 const sqsClient = new AWS.SQS({ region: "eu-west-1" });
-const queueUrl = "";
+const queueUrl = process.env.INVOICE_QUEUE_URL;
 export const handler: APIGatewayProxyHandlerV2 = async (
   event: APIGatewayProxyEventV2
 ) => {

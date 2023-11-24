@@ -7,11 +7,17 @@ import fs from "fs";
 
 const sqsClient = new AWS.SQS();
 const s3 = new AWS.S3({});
-const queueUrl = "";
 
 const bucketName = process.env.INVOICES_S3_BUCKET;
 const invoiceTable = process.env.INVOICES_TABLE;
+const queueUrl = process.env.INVOICE_QUEUE_URL;
 const docClient = new AWS.DynamoDB.DocumentClient();
+
+interface InvoiceData {
+  from: string;
+  to: string;
+  invoiceUrl?: string;
+}
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   console.log("Processing  SQS Event...", JSON.stringify(event));
@@ -19,17 +25,19 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
   for (const sqsRecord of event.Records) {
     console.log("sqsRecord: ", sqsRecord);
 
-    // I added a invoice db in serverless file and save invoicedata into db
-    await await saveInvoice({});
+    try {
+      const parsedBody = JSON.parse(sqsRecord.body) as InvoiceData;
+      await saveInvoice(parsedBody);
 
-    await createAndUploadPdfONS3();
+      await createAndUploadPdfONS3();
 
-    sqsClient.deleteMessage({
-      QueueUrl: queueUrl,
-      ReceiptHandle: sqsRecord.receiptHandle,
-    });
+      sqsClient.deleteMessage({
+        QueueUrl: queueUrl,
+        ReceiptHandle: sqsRecord.receiptHandle,
+      });
 
-    console.log("Record has been deleted", sqsRecord.receiptHandle);
+      console.log("Record has been deleted", sqsRecord.receiptHandle);
+    } catch (err) {}
   }
 };
 
@@ -84,7 +92,7 @@ async function getUploadUrl(invoiceId: string) {
   });
 }
 
-async function saveInvoice(invoiceData) {
+async function saveInvoice(invoiceData: InvoiceData) {
   const item = {
     invoiceData,
     invoiceUrl: "",
