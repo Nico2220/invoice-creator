@@ -3,7 +3,7 @@ import * as AWS from "aws-sdk";
 import puppeteer from "puppeteer-core";
 import chromium from "chrome-aws-lambda";
 import * as uuid from "uuid";
-import fs from "fs";
+import * as fs from "fs";
 import path from "path";
 
 const sqsClient = new AWS.SQS();
@@ -23,6 +23,7 @@ interface InvoiceData {
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   console.log("Processing  SQS Event...", JSON.stringify(event));
+  const filePath = path.resolve(__dirname + "/index.html");
 
   for (const sqsRecord of event.Records) {
     try {
@@ -36,9 +37,10 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         invoiceUrl: `https://${bucketName}.s3.eu-west-1.amazonaws.com/${id}.pdf`,
       };
 
-      await saveInvoice(item);
-
-      await createAndUploadPdfONS3(item);
+      await Promise.all([
+        saveInvoice(item),
+        createAndUploadPdfONS3(item, filePath),
+      ]);
 
       sqsClient.deleteMessage({
         QueueUrl: queueUrl,
@@ -52,10 +54,13 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
   }
 };
 
-export async function createAndUploadPdfONS3({ id }: InvoiceData) {
+export async function createAndUploadPdfONS3(
+  { id }: InvoiceData,
+  filePath: string
+) {
   const path = await chromium.executablePath;
   try {
-    const htmlFile = (await readFile()) as string;
+    const htmlFile = (await readFile(filePath)) as string;
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
@@ -108,15 +113,11 @@ async function saveInvoice(invoiceData: InvoiceData) {
   return invoiceData;
 }
 
-function readFile() {
+function readFile(filePath: string) {
   return new Promise((resolve, reject) => {
-    fs.readFile(
-      path.resolve("../../../src/template/index.html"),
-      "utf8",
-      (err, data) => {
-        if (err) reject(err);
-        resolve(data);
-      }
-    );
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) reject(err);
+      resolve(data);
+    });
   });
 }
